@@ -2,10 +2,17 @@
 
 function Download-Pages {
   param(
-    [Parameter(Mandatory)][string]$fileName
+    [Parameter(Mandatory)][string]$filePath
     )
-  $URLs = get-content $fileName
-  $URLs = $URLs -split "\'"
-  $URLs = $URLs | where-object {$_ -match "https://*"}
-  echo $URLs
+  $URLs = @()
+  $rawURLs = get-content $filePath
+  $rawURLs = $rawURLs -split "\'"
+  $rawURLs = $rawURLs | where-object {$_ -match "https://*"}
+  foreach ($rawURL in $rawURLs) {
+    $URLs += [pscustomobject]@{
+      Date = (get-date -format yyMMdd)
+      ID = ($rawURL -split "&" | where-object {$_ -match "eventid=*"} | % {$_ -replace "eventid=", ""})
+    }
+  }
+  echo URLs
 }
