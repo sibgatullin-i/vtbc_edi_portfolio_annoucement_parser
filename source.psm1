@@ -11,11 +11,13 @@ function Download-Pages {
   foreach ($rawURL in $rawURLs) {
     $URLDate = (get-date -format yyMMdd)
     $URLId = ($rawURL -split "&" | where-object {$_ -match "eventid=*"} | % {$_ -replace "eventid=", ""})
+    $URLExchgcd = ($rawURL -split "&" | where-object {$_ -match "exchgcd=*"} | % {$_ -replace "exchgcd=", ""})
+    $URLSedol = ($rawURL -split "&" | where-object {$_ -match "sedol=*"} | % {$_ -replace "sedol=", ""})
     $URLs += [pscustomobject]@{
       Date = $URLDate
       ID = $URLId
       URL = $rawURL
-      Filename = ($URLId + "_" + $URLDate + ".html")
+      Filename = ($URLExchgcd + "_" + $URLSedol + "_" + $URLId + "_" + $URLDate + ".html")
     }
   }
   echo $URLs
