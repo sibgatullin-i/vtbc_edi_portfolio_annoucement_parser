@@ -15,7 +15,7 @@ function Download-Pages {
       Date = $URLDate
       ID = $URLId
       URL = $rawURL
-      Filename = ("$URLId_$URLDate.html")
+      Filename = ($URLId + "_" + $URLDate + ".html")
     }
   }
   echo $URLs
