@@ -9,9 +9,13 @@ function Download-Pages {
   $rawURLs = $rawURLs -split "\'"
   $rawURLs = $rawURLs | where-object {$_ -match "https://*"}
   foreach ($rawURL in $rawURLs) {
+    $URLDate = (get-date -format yyMMdd)
+    $URLId = ($rawURL -split "&" | where-object {$_ -match "eventid=*"} | % {$_ -replace "eventid=", ""})
     $URLs += [pscustomobject]@{
-      Date = (get-date -format yyMMdd)
-      ID = ($rawURL -split "&" | where-object {$_ -match "eventid=*"} | % {$_ -replace "eventid=", ""})
+      Date = $URLDate
+      ID = $URLId
+      URL = $rawURL
+      Filename = ("$URLId_$URLDate.html")
     }
   }
   echo $URLs
