@@ -11,7 +11,7 @@ function Download-Pages {
   $rawURLs = $rawURLs -split "\'"
   $rawURLs = $rawURLs | where-object {$_ -match "https://*"}
   foreach ($rawURL in $rawURLs) {
-    $URLDate = (get-date -format yyyyMMdd)
+    $URLDate = (get-date -format "yyyyMMdd_hhMMssffff")
     $URLId = ($rawURL -split "&" | where-object {$_ -match "eventid=*"} | % {$_ -replace "eventid=", ""})
     $URLExchgcd = ($rawURL -split "&" | where-object {$_ -match "exchgcd=*"} | % {$_ -replace "exchgcd=", ""})
     $URLSedol = ($rawURL -split "&" | where-object {$_ -match "sedol=*"} | % {$_ -replace "sedol=", ""})
