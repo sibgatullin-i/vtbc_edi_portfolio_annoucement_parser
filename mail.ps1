@@ -60,14 +60,14 @@ Write-Host "Using POP3 in PowerShell - Dominik Deak <deak.software@gmail.com>, D
    Configuration data.
   ---------------------------------------------------------------------------#>
 # Path configurations
-$openPopLibraryURL = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath( "..\Binaries\OpenPop.dll" )
+$openPopLibraryURL = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath( ".\lib\OpenPop.dll" )
 $tempBaseURL       = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath( "..\Temp\" ) # Or use system temp dir via [System.IO.Path]::GetTempPath()
 $testMessageURL    = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath( "..\Examples\Test-Message.eml" )
 
 # Incoming email configuration used for fetching messages
-$incomingUsername  = ""
-$incomingPassword  = ""
-$incomingServer    = ""
+$incomingUsername  = Read-host "username"
+$incomingPassword  = read-host "password"
+$incomingServer    = "outlook.office365.com"
 $incomingPortPOP3  = 995   # Normally 110 (not secure), or 995 (SSL)
 $incomingEnableSSL = $true
 
@@ -310,7 +310,8 @@ function loadAndListMessage
 <#---------------------------------------------------------------------------
    Run the demo.
   ---------------------------------------------------------------------------#>
-[Reflection.Assembly]::LoadFile( $openPopLibraryURL )
+#[Reflection.Assembly]::LoadFile( $openPopLibraryURL )
+Add-type -Path $openPopLibraryURL
 
 try {
    Write-Host "Connecting to POP3 server: $incomingServer`:$incomingPortPOP3"
