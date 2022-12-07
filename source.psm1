@@ -24,6 +24,6 @@ function Download-Pages {
   foreach ($URL in $URLs) {
     $file = join-path -path $folder -childpath $URL.Filename
     $html = (invoke-webrequest -UseBasicParsing $URL).content  
-    set-content -path $file $html
+    set-content -path $file -value $html
   }
 }
