@@ -5,8 +5,9 @@ function Download-Pages {
     [Parameter(Mandatory)][string]$filePath,
     [Parameter(Mandatory)][string]$folder
     )
+  $incomingFile = get-childitem $filePath
   $URLs = @()
-  $rawURLs = get-content $filePath
+  $rawURLs = get-content $incomingFile
   $rawURLs = $rawURLs -split "\'"
   $rawURLs = $rawURLs | where-object {$_ -match "https://*"}
   foreach ($rawURL in $rawURLs) {
@@ -18,7 +19,7 @@ function Download-Pages {
       Date = $URLDate
       ID = $URLId
       URL = $rawURL
-      Filename = ($URLExchgcd + "_" + $URLSedol + "_" + $URLId + "_" + $URLDate + ".html")
+      Filename = ($incomingFile.Basename + "_" + $URLExchgcd + "_" + $URLSedol + "_" + $URLId + "_" + $URLDate + ".html")
     }
   }
   foreach ($URL in $URLs) {
