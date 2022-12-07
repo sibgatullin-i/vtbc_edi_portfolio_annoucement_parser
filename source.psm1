@@ -2,7 +2,7 @@
 
 function Download-Pages {
   param(
-    [Parameter(Mandatory)][string]$filePath
+    [Parameter(Mandatory)][string]$filePath,
     [Parameter(Mandatory)][string]$folder
     )
   $URLs = @()
