@@ -1,3 +1,3 @@
-import-module "source.psm"
+import-module ".\source.psm"
 
 Download-Pages
