@@ -14,5 +14,5 @@ function Download-Pages {
       ID = ($rawURL -split "&" | where-object {$_ -match "eventid=*"} | % {$_ -replace "eventid=", ""})
     }
   }
-  echo URLs
+  echo $URLs
 }
