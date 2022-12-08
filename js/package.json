@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "base64-stream": "^1.0.0",
+    "imap": "^0.8.19"
+  }
+}
