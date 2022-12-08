@@ -46,10 +46,11 @@ function Download-Pages {
     $page = $page -replace "(?s)<script.+?</script>", ""
     $page = $page -replace "(?s)<style.+?</style>", ""
     Set-Content -Path $newPath -Value $page
-    $item.Url = "./" + $newName
+    $item.EventID = "<a href='./" + $newName + "'>" + $item.EventID + "</a>" 
+    $item.Url = "<a href='./" + $newName + "'></a>"
   }
   $array
-  $array | convertto-html | Out-File (Join-Path -Path $folder -ChildPath ("index_" + $incomingFile.BaseName + (get-date -Format 'yyyyMMdd_hhMMssffff') + '.html'))
+  $array | convertto-html | % {$_ -replace "&#39;","'" -replace '&lt;','<' -replace '&gt;','>'} | Out-File (Join-Path -Path $folder -ChildPath ("index_" + $incomingFile.BaseName + (get-date -Format 'yyyyMMdd_hhMMssffff') + '.html'))
   #$array | ConvertTo-Json | Out-File $incomingFile
 }
 
