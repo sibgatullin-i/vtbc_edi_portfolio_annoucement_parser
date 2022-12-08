@@ -47,9 +47,9 @@ function Download-Pages {
     $page = $page -replace "(?s)<style.+?</style>", ""
     Set-Content -Path $newPath -Value $page
     $item.Url = "./" + $newName
-    $item | convertto-html | Out-File (Join-Path -Path $folder -ChildPath ("index_" + $incomingFile.BaseName + (get-date -Format 'yyyyMMdd_hhMMssffff') + '.html'))
   }
   $array
+  $array | convertto-html | Out-File (Join-Path -Path $folder -ChildPath ("index_" + $incomingFile.BaseName + (get-date -Format 'yyyyMMdd_hhMMssffff') + '.html'))
   #$array | ConvertTo-Json | Out-File $incomingFile
 }
 
