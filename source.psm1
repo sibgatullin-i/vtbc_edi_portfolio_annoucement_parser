@@ -1,6 +1,6 @@
 
 
-function Download-Pages {
+function Download-Pages2 {
   param(
     [Parameter(Mandatory)][string]$filePath,
     [Parameter(Mandatory)][string]$folder
@@ -30,6 +30,27 @@ function Download-Pages {
     $html = $html -replace "(?s)<style.+?</style>", ""
     set-content -path $file -value $html
   }
+}
+
+function Download-Pages {
+  param(
+    [Parameter(Mandatory)][string]$Filepath,
+    [Parameter(Mandatory)][string]$Folder
+  )
+  $incomingFile = get-childitem $Filepath
+  $array = (get-content $incomingFile | ConvertFrom-Json)
+  foreach ($item in $array) {
+    $page = (Invoke-WebRequest -UseBasicParsing $item.Url).Content
+    $newName = $incomingFile.BaseName + '_' + (get-date -Format 'yyyyMMdd_hhMMssffff') + '.html'
+    $newPath = Join-Path -Path $Folder -ChildPath $newName
+    $page = $page -replace "(?s)<script.+?</script>", ""
+    $page = $page -replace "(?s)<style.+?</style>", ""
+    Set-Content -Path $newPath -Value $page
+    $item.Url = "./" + $newName
+    $item | convertto-html | Out-File (Join-Path -Path $folder -ChildPath ("index_" + $incomingFile.BaseName + (get-date -Format 'yyyyMMdd_hhMMssffff') + '.html'))
+  }
+  $array
+  #$array | ConvertTo-Json | Out-File $incomingFile
 }
 
 function Parse-HTML {
