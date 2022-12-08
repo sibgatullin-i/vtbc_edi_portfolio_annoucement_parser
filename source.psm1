@@ -32,3 +32,31 @@ function Download-Pages {
   }
 }
 
+function Parse-HTML {
+  param(
+    [Parameter(Mandatory)][string]$Path
+  )
+  if (!(Test-Path $path)) {write-warning "File $Path not found"; return $false}
+  $HTML = (Get-Content $Path | ConvertFrom-Html)
+  $HTML = $HTML.SelectNodes('//table') | where-object {$_.InnerText -like "event*"}
+  $HTML = $HTML.SelectNodes('tr')
+  $tableHeader = $HTML[0].SelectNodes('td').InnerText
+  $HTML = $HTML | where-object {$_.InnerText -notlike "event*"}
+  $array = @()
+  foreach ($line in $HTML) {
+    $array += [pscustomobject]@{
+      $tableHeader[0] = $line.SelectNodes('td')[0].InnerText
+      $tableHeader[1] = $line.SelectNodes('td')[1].InnerText
+      $tableHeader[2] = $line.SelectNodes('td')[2].InnerText
+      $tableHeader[3] = $line.SelectNodes('td')[3].InnerText
+      $tableHeader[4] = $line.SelectNodes('td')[4].InnerText
+      $tableHeader[5] = $line.SelectNodes('td')[5].InnerText
+      $tableHeader[6] = $line.SelectNodes('td')[6].InnerText
+      $tableHeader[7] = $line.SelectNodes('td')[7].InnerText
+      $tableHeader[8] = $line.SelectNodes('td')[8].InnerText
+      Url = ($line.InnerHtml -split "'" | Where-Object {$_ -like "http*"})
+    }
+  }
+  Return $array
+
+}
