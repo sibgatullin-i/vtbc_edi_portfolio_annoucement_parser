@@ -44,13 +44,13 @@ function Download-Pages {
     $newName = $incomingFile.BaseName + '_' + (get-date -Format 'yyyyMMdd_hhMMssffff') + '.html'
     $newPath = Join-Path -Path $Folder -ChildPath $newName
     $page = $page -replace "(?s)<script.+?</script>", ""
-    $page = $page -replace "(?s)<style.+?</style>", ""
+    $page = $page -replace "(?s)<style.+?</style>", "<style type='text/css'>@import url('./style.css');</style>"
     Set-Content -Path $newPath -Value $page
     $item.EventID = "<a href='./" + $newName + "'>" + $item.EventID + "</a>" 
     $item.Url = "<a href='./" + $newName + "'></a>"
   }
   $array
-  $array | convertto-html | % {$_ -replace "&#39;","'" -replace '&lt;','<' -replace '&gt;','>'} | Out-File (Join-Path -Path $folder -ChildPath ("index_" + $incomingFile.BaseName + (get-date -Format 'yyyyMMdd_hhMMssffff') + '.html'))
+  $array | select-object -ExcludeProperty Url| convertto-html -CssUri "./style.css" | % {$_ -replace "&#39;","'" -replace '&lt;','<' -replace '&gt;','>'} | Out-File (Join-Path -Path $folder -ChildPath ("index_" + $incomingFile.BaseName + (get-date -Format 'yyyyMMdd_hhMMssffff') + '.html'))
   #$array | ConvertTo-Json | Out-File $incomingFile
 }
 
