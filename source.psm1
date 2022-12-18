@@ -1,37 +1,4 @@
 
-
-function Download-Pages2 {
-  param(
-    [Parameter(Mandatory)][string]$filePath,
-    [Parameter(Mandatory)][string]$folder
-    )
-  $incomingFile = get-childitem $filePath
-  $URLs = @()
-  $rawURLs = get-content $incomingFile
-  $rawURLs = $rawURLs -split "\'"
-  $rawURLs = $rawURLs | where-object {$_ -match "https://*"}
-  foreach ($rawURL in $rawURLs) {
-    $URLDate = (get-date -format "yyyyMMdd_hhMMssffff")
-    $URLId = ($rawURL -split "&" | where-object {$_ -match "eventid=*"} | % {$_ -replace "eventid=", ""})
-    $URLExchgcd = ($rawURL -split "&" | where-object {$_ -match "exchgcd=*"} | % {$_ -replace "exchgcd=", ""})
-    $URLSedol = ($rawURL -split "&" | where-object {$_ -match "sedol=*"} | % {$_ -replace "sedol=", ""})
-    $URLs += [pscustomobject]@{
-      Date = $URLDate
-      ID = $URLId
-      URL = $rawURL
-      Filename = ($incomingFile.Basename + "_" + $URLExchgcd + "_" + $URLSedol + "_" + $URLId + "_" + $URLDate + ".html")
-    }
-  }
-  foreach ($URL in $URLs) {
-    $file = join-path -path $folder -childpath $URL.Filename
-    if (test-path $file) {write-warning "Overwriting $file"}
-    $html = (invoke-webrequest -UseBasicParsing $URL.URL).content
-    $html = $html -replace "(?s)<script.+?</script>", ""
-    $html = $html -replace "(?s)<style.+?</style>", ""
-    set-content -path $file -value $html
-  }
-}
-
 function Download-Pages {
   param(
     [Parameter(Mandatory)][string]$Filepath,
@@ -81,4 +48,24 @@ function Parse-HTML {
   }
   Return $array
 
+}
+
+function Get-Mail {
+  param(
+    [Parameter(Mandatory)][string]$Server,
+    [Parameter(Mandatory)][string]$Port,
+    [Parameter(Mandatory)][string]$Username,
+    [Parameter(Mandatory)][string]$Password,
+    [Parameter(Mandatory)][string]$enableSSL = $true
+  )
+  $pop3Client = New-Object OpenPop.Pop3.Pop3Client
+  $pop3Client.connect( $server, $port, $enableSSL )
+
+  if ( !$pop3Client.connected )
+    {
+      throw "Unable to create POP3 client. Connection failed with server $server"
+    }
+  $pop3Client.authenticate( $username, $password )
+
+  
 }
