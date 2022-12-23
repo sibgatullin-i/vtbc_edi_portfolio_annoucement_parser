@@ -57,7 +57,7 @@ function Connect-Mail {
     [Parameter(Mandatory=$false)][string]$Server = "outlook.office365.com",
     [Parameter(Mandatory=$false)][string]$Port = "995",
     [Parameter(Mandatory=$false)][string]$Username = "incoming_data@outlook.com",
-    [Parameter(Mandatory=$false)][string]$Password = "Kr0kadeel",
+    [Parameter(Mandatory)][string]$Password,
     [Parameter(Mandatory=$false)][string]$enableSSL = $true
   )
   $pop3Client = New-Object OpenPop.Pop3.Pop3Client
