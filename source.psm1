@@ -16,8 +16,10 @@ function Download-Pages {
     $item.EventID = "<a href='./" + $newName + "'>" + $item.EventID + "</a>" 
     $item.Url = "<a href='./" + $newName + "'></a>"
   }
-  $array
-  $array | select-object -ExcludeProperty Url| convertto-html -CssUri "./style.css" | % {$_ -replace "&#39;","'" -replace '&lt;','<' -replace '&gt;','>'} | Out-File (Join-Path -Path $folder -ChildPath ("index_" + $incomingFile.BaseName + (get-date -Format 'yyyyMMdd_hhMMssffff') + '.html'))
+  #$array
+  $array | select-object -ExcludeProperty Url| convertto-html -CssUri "./style.css" |
+    ForEach-Object {$_ -replace "&#39;","'" -replace '&lt;','<' -replace '&gt;','>'} |
+    Out-File (Join-Path -Path $folder -ChildPath ("index_" + $incomingFile.BaseName + (get-date -Format 'yyyyMMdd_hhMMssffff') + '.html'))
   #$array | ConvertTo-Json | Out-File $incomingFile
 }
 
@@ -50,13 +52,13 @@ function Parse-HTML {
 
 }
 
-function Get-Mail {
+function Connect-Mail {
   param(
-    [Parameter(Mandatory)][string]$Server,
-    [Parameter(Mandatory)][string]$Port,
-    [Parameter(Mandatory)][string]$Username,
-    [Parameter(Mandatory)][string]$Password,
-    [Parameter(Mandatory)][string]$enableSSL = $true
+    [Parameter(Mandatory=$false)][string]$Server = "outlook.office365.com",
+    [Parameter(Mandatory=$false)][string]$Port = "995",
+    [Parameter(Mandatory=$false)][string]$Username = "incoming_data@outlook.com",
+    [Parameter(Mandatory=$false)][string]$Password = "Kr0kadeel",
+    [Parameter(Mandatory=$false)][string]$enableSSL = $true
   )
   $pop3Client = New-Object OpenPop.Pop3.Pop3Client
   $pop3Client.connect( $server, $port, $enableSSL )
@@ -67,5 +69,37 @@ function Get-Mail {
     }
   $pop3Client.authenticate( $username, $password )
 
-  
+  return $pop3Client
 }
+
+function Check-Mail {
+  param(
+    [Parameter(Mandatory)][OpenPop.Pop3.Pop3Client]$pop3Client,
+    [Parameter(Mandatory=$false)][string]$From = "ilya-sibgatullin@ya.ru"
+  )
+
+  $messageCount = $pop3Client.getMessageCount()
+  $targetMessages = @()
+  
+  for ($currentIndex = $messageCount; $currentIndex -gt 0; $currentIndex--){
+    $messageFrom = $pop3Client.getMessage($currentIndex).Headers.From.Address
+    if ($messageFrom -like $From) {
+      $targetMessages += [pscustomobject]@{index = $currentIndex; messageFrom = $messageFrom}
+    }
+  }
+  write-host "$messageCount total messages"
+  write-host "$($targetMessages.count) from $From"
+  return $targetMessages
+}
+
+function saveAttachment {
+   Param
+      (
+      [System.Net.Mail.Attachment] $attachment,
+      [string] $Path
+      )
+   New-Item -Path $Path -ItemType "File" -Force | Out-Null
+   $outStream = New-Object IO.FileStream $outURL, "Create"
+   $attachment.contentStream.copyTo( $outStream )
+   $outStream.close()
+  }
