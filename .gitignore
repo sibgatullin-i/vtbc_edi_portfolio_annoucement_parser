@@ -3,3 +3,4 @@ download/
 .DS_Store
 node_modules/
 inbox/
+outbox/
