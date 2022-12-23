@@ -75,7 +75,7 @@ function Connect-Mail {
 function Check-Mail {
   param(
     [Parameter(Mandatory)][OpenPop.Pop3.Pop3Client]$pop3Client,
-    [Parameter(Mandatory=$false)][string]$From = "ilya-sibgatullin@ya.ru"
+    [Parameter(Mandatory=$false)][string]$From = "ilya.sibgatullin@gmail.com"
   )
 
   $messageCount = $pop3Client.getMessageCount()
@@ -83,12 +83,15 @@ function Check-Mail {
   
   for ($currentIndex = $messageCount; $currentIndex -gt 0; $currentIndex--){
     $messageFrom = $pop3Client.getMessage($currentIndex).Headers.From.Address
-    if ($messageFrom -like $From) {
-      $targetMessages += [pscustomobject]@{index = $currentIndex; messageFrom = $messageFrom}
+    $messageAttachment = $pop3Client.GetMessage($currentIndex).FindAllAttachments().count
+    if ($messageFrom -like $From -and $messageAttachment -gt 0) {
+      $targetMessages += [pscustomobject]@{index = $currentIndex; target = $true}
+    } else {
+      $targetMessages += [pscustomobject]@{index = $currentIndex; target = $false}
     }
   }
   write-host "$messageCount total messages"
-  write-host "$($targetMessages.count) from $From"
+  write-host "$(($targetMessages | where-Object {$_.target -eq $true}).count ) from $From with attachments"
   return $targetMessages
 }
 
@@ -99,7 +102,24 @@ function saveAttachment {
       [string] $Path
       )
    New-Item -Path $Path -ItemType "File" -Force | Out-Null
-   $outStream = New-Object IO.FileStream $outURL, "Create"
+   $outStream = New-Object IO.FileStream $Path, "Create"
    $attachment.contentStream.copyTo( $outStream )
    $outStream.close()
   }
+
+  function FetchAndSave-Attachment {
+    Param
+      (
+      [OpenPop.Pop3.Pop3Client] $pop3Client,
+      [string] $Folder,
+      [int]$messageIndex
+      )
+        $uid = $pop3Client.getMessageUid( $messageIndex )
+        $incomingMessage = $pop3Client.getMessage( $messageIndex ).toMailMessage()
+        foreach ($attachment in $incomingMessage.Attachments) {
+          $attachmentURL = Join-Path -Path $Folder -ChildPath "$(get-date -Format 'yyyyMMdd_hhMMssffff')_$($attachment.name)"
+          Write-Host "`tSaving attachment to:" $attachmentURL
+          saveAttachment $attachment $attachmentURL
+        }
+  }
+  
