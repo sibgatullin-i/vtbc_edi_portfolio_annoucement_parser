@@ -75,7 +75,7 @@ function Connect-Mail {
 function Check-Mail {
   param(
     [Parameter(Mandatory)][OpenPop.Pop3.Pop3Client]$pop3Client,
-    [Parameter(Mandatory=$false)][string]$From = "ilya.sibgatullin@gmail.com"
+    [Parameter(Mandatory=$false)][string]$From = "noreply@exchange-data.com"
   )
 
   $messageCount = $pop3Client.getMessageCount()
@@ -122,4 +122,3 @@ function saveAttachment {
           saveAttachment $attachment $attachmentURL
         }
   }
-  
