@@ -1,14 +1,12 @@
-
 function Download-Pages {
   param(
-    [Parameter(Mandatory)][string]$Filepath,
-    [Parameter(Mandatory)][string]$Folder
+    [Parameter(Mandatory)]$sourceData,
+    [Parameter(Mandatory)][string]$Folder,
+    [Parameter(Mandatory)][string]$Prefix
   )
-  $incomingFile = get-childitem $Filepath
-  $array = (get-content $incomingFile | ConvertFrom-Json)
-  foreach ($item in $array) {
+  foreach ($item in $sourceData) {
     $page = (Invoke-WebRequest -UseBasicParsing $item.Url).Content
-    $newName = $incomingFile.BaseName + '_' + (get-date -Format 'yyyyMMdd_hhMMssffff') + '.html'
+    $newName = $Prefix + '_' + (get-date -Format 'yyyyMMdd_hhMMssffff') + '.html'
     $newPath = Join-Path -Path $Folder -ChildPath $newName
     $page = $page -replace "(?s)<script.+?</script>", ""
     $page = $page -replace "(?s)<style.+?</style>", "<style type='text/css'>@import url('./style.css');</style>"
@@ -16,11 +14,9 @@ function Download-Pages {
     $item.EventID = "<a href='./" + $newName + "'>" + $item.EventID + "</a>" 
     $item.Url = "<a href='./" + $newName + "'></a>"
   }
-  #$array
-  $array | select-object -ExcludeProperty Url| convertto-html -CssUri "./style.css" |
+  $sourceData | select-object -ExcludeProperty Url| convertto-html -CssUri "./style.css" |
     ForEach-Object {$_ -replace "&#39;","'" -replace '&lt;','<' -replace '&gt;','>'} |
-    Out-File (Join-Path -Path $folder -ChildPath ("index_" + $incomingFile.BaseName + (get-date -Format 'yyyyMMdd_hhMMssffff') + '.html'))
-  #$array | ConvertTo-Json | Out-File $incomingFile
+    Out-File (Join-Path -Path $folder -ChildPath ("index_" + $Prefix + (get-date -Format 'yyyyMMdd_hhMMssffff') + '.html'))
 }
 
 function Parse-HTML {
@@ -117,7 +113,7 @@ function saveAttachment {
         $uid = $pop3Client.getMessageUid( $messageIndex )
         $incomingMessage = $pop3Client.getMessage( $messageIndex ).toMailMessage()
         foreach ($attachment in $incomingMessage.Attachments) {
-          $attachmentURL = Join-Path -Path $Folder -ChildPath "$(get-date -Format 'yyyyMMdd_hhMMssffff')_$($attachment.name)"
+          $attachmentURL = Join-Path -Path $Folder -ChildPath "$(get-date -Format 'yyyyMMdd_hhMMssffff')-_-$($attachment.name)"
           Write-Host "`tSaving attachment to:" $attachmentURL
           saveAttachment $attachment $attachmentURL
         }

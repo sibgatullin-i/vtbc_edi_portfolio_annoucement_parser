@@ -4,3 +4,4 @@ download/
 node_modules/
 inbox/
 outbox/
+telegram.psm1
