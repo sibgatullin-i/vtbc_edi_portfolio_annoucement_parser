@@ -36,7 +36,7 @@ if ( ($mails | Where-Object {$_.target -eq $true}).count -eq 0 ) { write-host "N
 foreach ($mail in $mails) { 
   if ($mail.target -eq $true) {
     FetchAndSave-Attachment -pop3Client $pop3Client -Folder $inboxFolder -messageIndex $mail.index  
-    #$pop3Client.DeleteMessage($mail.index)
+    $pop3Client.DeleteMessage($mail.index)
   } else {
     $pop3Client.DeleteMessage($mail.index)
   }
