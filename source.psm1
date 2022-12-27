@@ -50,9 +50,9 @@ function Parse-HTML {
 
 function Connect-Mail {
   param(
-    [Parameter(Mandatory=$false)][string]$Server = "outlook.office365.com",
-    [Parameter(Mandatory=$false)][string]$Port = "995",
-    [Parameter(Mandatory=$false)][string]$Username = "incoming_data@outlook.com",
+    [Parameter(Mandatory)][string]$Server,
+    [Parameter(Mandatory)][string]$Port,
+    [Parameter(Mandatory)][string]$Username,
     [Parameter(Mandatory)][string]$Password,
     [Parameter(Mandatory=$false)][string]$enableSSL = $true
   )

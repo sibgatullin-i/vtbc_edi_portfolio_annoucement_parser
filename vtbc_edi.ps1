@@ -1,5 +1,3 @@
-
-
 add-type -path ((join-path -path (join-path -Path $PSScriptRoot -ChildPath "lib") -ChildPath "OpenPop.dll"))
 Import-Module Transferetto -Force
 Import-Module (join-path -Path $PSScriptRoot -ChildPath "source.psm1")
@@ -24,7 +22,7 @@ Get-ChildItem $outboxFolder | Remove-Item -Force -Recurse
 
 
 # first we connect to POP3 and store it to variable
-$pop3Client = Connect-Mail -Password "Kr0kadeel"# (read-host "Password")
+$pop3Client = Connect-Mail -Server $mailServer -Port $mailPort -Username $mailUsername -Password $mailPassword
 
 # now we check to see if there is any mail for us
 $mails = Check-Mail $pop3Client
