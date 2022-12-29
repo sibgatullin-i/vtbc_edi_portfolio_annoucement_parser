@@ -56,7 +56,7 @@ foreach ($incomingFile in $incomingFiles) {
   $sourceData = $source[2]
   $folder = ( (Join-Path -Path $outboxFolder -ChildPath "$incomingFileBasename-$HTMLdate")  )
   mkdir $folder
-  Download-Pages -sourceData $sourceData -Folder $folder -Prefix $incomingFileBaseName -HTMLheader $HTMLheader
+  Download-Pages -sourceData $sourceData -Folder $folder -Prefix $incomingFileBaseName -HTMLdate $HTMLdate -HTMLheader $HTMLheader
   Copy-Item $cssFile $folder
 } 
 

@@ -3,11 +3,12 @@ function Download-Pages {
     [Parameter(Mandatory)]$sourceData,
     [Parameter(Mandatory)][string]$Folder,
     [Parameter(Mandatory)][string]$Prefix,
+    [Parameter(Mandatory)][string]$HTMLdate,
     [Parameter(Mandatory)][string]$HTMLheader
   )
   foreach ($item in $sourceData) {
     $page = (Invoke-WebRequest -UseBasicParsing $item.Url).Content
-    $newName = $Prefix + '-' + (get-date -Format 'yyyyMMdd_hhMMssffff') + '.html'
+    $newName = $Prefix + '-' + $HTMLdate + (get-date -Format '_hhMMssffff') + '.html'
     $newPath = Join-Path -Path $Folder -ChildPath $newName
     $page = $page -replace "(?s)<script.+?</script>", ""
     $page = $page -replace "(?s)<style.+?</style>", "<style type='text/css'>@import url('./style.css');</style>"
@@ -15,9 +16,9 @@ function Download-Pages {
     $item.EventID = "<a href='./" + $newName + "'>" + $item.EventID + "</a>" 
     $item.Url = "<a href='./" + $newName + "'></a>"
   }
-  $sourceData | select-object -ExcludeProperty Url| convertto-html -CssUri "./style.css" -PreContent "<h2>$HTMLheader</h2>" -Title $HTMLheader |
+  $sourceData | select-object -Property * -ExcludeProperty Url| convertto-html -CssUri "./style.css" -PreContent "<h2>$HTMLheader</h2>" -Title $HTMLheader |
     ForEach-Object {$_ -replace "&#39;","'" -replace '&lt;','<' -replace '&gt;','>'} |
-    Out-File (Join-Path -Path $folder -ChildPath ("index_" + $Prefix + '-' + (get-date -Format 'yyyyMMdd_hhMMssffff') + '.html'))
+    Out-File (Join-Path -Path $folder -ChildPath ("index_" + $Prefix + '-' + $HTMLdate + (get-date -Format '_hhMMssffff') + '.html'))
 }
 
 function Parse-HTML {
