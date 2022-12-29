@@ -3,6 +3,8 @@ Import-Module Transferetto -Force
 Import-Module (join-path -Path $PSScriptRoot -ChildPath "source.psm1")
 #Import-Module (join-path -Path $PSScriptRoot -ChildPath "telegram.psm1")
 
+#Get-Module | Where-Object {$_.Name -like "Transferetto" -or $_.Name -like "PowerHTML"}
+
 $inboxFolder = (Join-Path -Path $PSScriptRoot -ChildPath "inbox")
 $outboxFolder = (Join-Path -Path $PSScriptRoot -ChildPath "outbox")
 $cssFile = (Join-Path -path (Join-Path -Path $PSScriptRoot -ChildPath ./lib) -ChildPath "style.css")
@@ -34,7 +36,7 @@ if ( ($mails | Where-Object {$_.target -eq $true}).count -eq 0 ) { write-host "N
 foreach ($mail in $mails) { 
   if ($mail.target -eq $true) {
     FetchAndSave-Attachment -pop3Client $pop3Client -Folder $inboxFolder -messageIndex $mail.index  
-    $pop3Client.DeleteMessage($mail.index)
+    #$pop3Client.DeleteMessage($mail.index)
   } else {
     $pop3Client.DeleteMessage($mail.index)
   }
@@ -48,10 +50,13 @@ $incomingFiles = (Get-ChildItem $inboxFolder)
 foreach ($incomingFile in $incomingFiles) {
   $incomingFileBaseName = ($incomingFile.BaseName -split "-_-")[1]
   $incomingFileTimeStamp = ($incomingFile.BaseName -split "-_-")[0]
-  $folder = ( (Join-Path -Path $outboxFolder -ChildPath "$incomingFileBasename-$incomingFileTimeStamp")  )
+  $source = (Parse-HTML $incomingFile.FullName)
+  $HTMLheader = $source[0]
+  $HTMLdate = $source[1]
+  $sourceData = $source[2]
+  $folder = ( (Join-Path -Path $outboxFolder -ChildPath "$incomingFileBasename-$HTMLdate")  )
   mkdir $folder
-  $sourceData = (Parse-HTML $incomingFile)
-  Download-Pages -sourceData $sourceData -Folder $folder -Prefix $incomingFileBaseName
+  Download-Pages -sourceData $sourceData -Folder $folder -Prefix $incomingFileBaseName -HTMLheader $HTMLheader
   Copy-Item $cssFile $folder
 } 
 
@@ -59,10 +64,10 @@ foreach ($incomingFile in $incomingFiles) {
 $sftpClient = Connect-SFTP -Server $sftpServer -Port $sftpPort -Verbose -Username $sftpUsername -Password $sftpPassword
 
 # Create folders and upload files
-foreach ($folder in $(Get-ChildItem $outboxFolder)) {
+foreach ($folder in (Get-ChildItem $outboxFolder)) {
   $sftpFolder = $sftpParentFolder + $folder.BaseName
   $sftpClient.CreateDirectory("$sftpFolder")
-  foreach ($file in (Get-ChildItem $folder)){
+  foreach ($file in (Get-ChildItem $folder.FullName)){
     Send-SFTPFile -SftpClient $sftpClient -LocalPath $file.FullName -RemotePath "$sftpFolder/$($file.name)" -AllowOverride
   }
 }

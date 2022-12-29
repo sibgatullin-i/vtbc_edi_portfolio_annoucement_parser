@@ -2,7 +2,8 @@ function Download-Pages {
   param(
     [Parameter(Mandatory)]$sourceData,
     [Parameter(Mandatory)][string]$Folder,
-    [Parameter(Mandatory)][string]$Prefix
+    [Parameter(Mandatory)][string]$Prefix,
+    [Parameter(Mandatory)][string]$HTMLheader
   )
   foreach ($item in $sourceData) {
     $page = (Invoke-WebRequest -UseBasicParsing $item.Url).Content
@@ -14,7 +15,7 @@ function Download-Pages {
     $item.EventID = "<a href='./" + $newName + "'>" + $item.EventID + "</a>" 
     $item.Url = "<a href='./" + $newName + "'></a>"
   }
-  $sourceData | select-object -ExcludeProperty Url| convertto-html -CssUri "./style.css" |
+  $sourceData | select-object -ExcludeProperty Url| convertto-html -CssUri "./style.css" -PreContent "<h2>$HTMLheader</h2>" -Title $HTMLheader |
     ForEach-Object {$_ -replace "&#39;","'" -replace '&lt;','<' -replace '&gt;','>'} |
     Out-File (Join-Path -Path $folder -ChildPath ("index_" + $Prefix + '-' + (get-date -Format 'yyyyMMdd_hhMMssffff') + '.html'))
 }
@@ -27,6 +28,8 @@ function Parse-HTML {
   $HTML = (Get-Content $Path | ConvertFrom-Html)
   $HTML = $HTML.SelectNodes('//table') | where-object {$_.InnerText -like "event*"}
   $HTML = $HTML.SelectNodes('tr')
+  $HTMLheader = $HTML.selectnodes('//table')[0].selectnodes('tr')[0].innertext
+  $HTMLdate = $HTMLheader.Substring($HTMLheader.length - 10)
   $tableHeader = $HTML[0].SelectNodes('td').InnerText
   $HTML = $HTML | where-object {$_.InnerText -notlike "event*"}
   $array = @()
@@ -44,7 +47,7 @@ function Parse-HTML {
       Url = ($line.InnerHtml -split "'" | Where-Object {$_ -like "http*"})
     }
   }
-  Return $array
+  Return $HTMLheader,$HTMLdate,$array
 
 }
 
