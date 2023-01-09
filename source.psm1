@@ -75,7 +75,7 @@ function Connect-Mail {
 function Check-Mail {
   param(
     [Parameter(Mandatory)][OpenPop.Pop3.Pop3Client]$pop3Client,
-    [Parameter(Mandatory=$false)][string]$From = "noreply@exchange-data.com"
+    [Parameter(Mandatory)][string]$From
   )
 
   $messageCount = $pop3Client.getMessageCount()

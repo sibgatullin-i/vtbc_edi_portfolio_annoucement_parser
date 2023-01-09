@@ -1,22 +1,23 @@
+#read settings
+$settings = (get-content (Join-Path -Path $PSScriptRoot -ChildPath "settings.json") | ConvertFrom-json)
+
 add-type -path ((join-path -path (join-path -Path $PSScriptRoot -ChildPath "lib") -ChildPath "OpenPop.dll"))
 Import-Module Transferetto -Force
 Import-Module (join-path -Path $PSScriptRoot -ChildPath "source.psm1")
-#Import-Module (join-path -Path $PSScriptRoot -ChildPath "telegram.psm1")
 
-#Get-Module | Where-Object {$_.Name -like "Transferetto" -or $_.Name -like "PowerHTML"}
-
-$inboxFolder = (Join-Path -Path $PSScriptRoot -ChildPath "inbox")
-$outboxFolder = (Join-Path -Path $PSScriptRoot -ChildPath "outbox")
-$cssFile = (Join-Path -path (Join-Path -Path $PSScriptRoot -ChildPath ./lib) -ChildPath "style.css")
-$sftpServer = (read-host "sftpServer")
-$sftpPort = 8022
-$sftpUsername = (read-host "sftpusername")
-$sftpPassword = (read-host "sftppassword")
-$sftpParentFolder = "/sftp/EDI/"
-$mailServer = "outlook.office365.com"
-$mailPort = "995"
-$mailUsername = (read-host "mailusername")
-$mailPassword = (read-host "mailpassword")
+$inboxFolder = $settings.inboxFolder
+$outboxFolder = $settings.outboxFolder
+$cssFile = $settings.cssFile
+$sftpServer = $settings.sftpServer
+$sftpPort = $settings.sftpPort
+$sftpUsername = $settings.sftpUsername
+$sftpPassword = $settings.sftpPassword
+$sftpParentFolder = $settings.sftpParentFolder
+$mailServer = $settings.mailServer
+$mailPort = $settings.mailPort
+$mailUsername = $settings.mailUsername
+$mailPassword = $settings.mailPassword
+$mailTargetfrom = $settings.mailTargetFrom
 
 # remove everything from folders
 Get-ChildItem $inboxFolder | Remove-Item -Force -Recurse
@@ -27,7 +28,7 @@ Get-ChildItem $outboxFolder | Remove-Item -Force -Recurse
 $pop3Client = Connect-Mail -Server $mailServer -Port $mailPort -Username $mailUsername -Password $mailPassword
 
 # now we check to see if there is any mail for us
-$mails = Check-Mail $pop3Client
+$mails = Check-Mail $pop3Client -From $mailTargetfrom
 
 # if none - exit
 if ( ($mails | Where-Object {$_.target -eq $true}).count -eq 0 ) { write-host "No matching emails found. Goodbye!" ; exit 0 } #else {Send-TelegramMessage "got some mail"}
@@ -36,7 +37,7 @@ if ( ($mails | Where-Object {$_.target -eq $true}).count -eq 0 ) { write-host "N
 foreach ($mail in $mails) { 
   if ($mail.target -eq $true) {
     FetchAndSave-Attachment -pop3Client $pop3Client -Folder $inboxFolder -messageIndex $mail.index  
-    #$pop3Client.DeleteMessage($mail.index)
+    $pop3Client.DeleteMessage($mail.index)
   } else {
     $pop3Client.DeleteMessage($mail.index)
   }
