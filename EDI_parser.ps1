@@ -16,7 +16,7 @@ $pop3Client = Connect-Mail -Server $settings.mailServer -Port $settings.mailPort
 $mails = Check-Mail $pop3Client -From $settings.mailTargetfrom
 
 # if none - exit
-if ( ($mails | Where-Object {$_.target -eq $true}).count -eq 0 ) { write-host "No matching emails found. Goodbye!" ; exit 0 } #else {Send-TelegramMessage "got some mail"}
+if ( ($mails | Where-Object {$_.target -eq $true}).count -eq 0 ) { write-host "No matching emails found. Goodbye!" ; write-host "Will exit in 10 seconds..." ; start-sleep 10; exit 0 }
 
 # proceed mails, if $_.target -eq $true - download and mark for deletion, else mark for deletion
 foreach ($mail in $mails) { 
