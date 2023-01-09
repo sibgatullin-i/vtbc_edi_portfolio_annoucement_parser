@@ -3,7 +3,7 @@ $settings = (get-content (Join-Path -Path $PSScriptRoot -ChildPath "settings.jso
 
 add-type -path ((join-path -path (join-path -Path $PSScriptRoot -ChildPath "lib") -ChildPath "OpenPop.dll"))
 Import-Module Transferetto -Force
-Import-Module (join-path -Path $PSScriptRoot -ChildPath "source.psm1")
+Import-Module ((join-path -path (join-path -Path $PSScriptRoot -ChildPath "lib") -ChildPath "source.psm1"))
 
 #$inboxFolder = $settings.inboxFolder
 #$outboxFolder = $settings.outboxFolder
