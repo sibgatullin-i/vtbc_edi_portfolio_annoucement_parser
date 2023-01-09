@@ -5,20 +5,6 @@ add-type -path ((join-path -path (join-path -Path $PSScriptRoot -ChildPath "lib"
 Import-Module Transferetto -Force
 Import-Module ((join-path -path (join-path -Path $PSScriptRoot -ChildPath "lib") -ChildPath "source.psm1"))
 
-#$inboxFolder = $settings.inboxFolder
-#$outboxFolder = $settings.outboxFolder
-#$cssFile = $settings.cssFile
-#$sftpServer = $settings.sftpServer
-#$sftpPort = $settings.sftpPort
-#$sftpUsername = $settings.sftpUsername
-#$sftpPassword = $settings.sftpPassword
-#$sftpParentFolder = $settings.sftpParentFolder
-#$mailServer = $settings.mailServer
-#$mailPort = $settings.mailPort
-#$mailUsername = $settings.mailUsername
-#$mailPassword = $settings.mailPassword
-#$mailTargetfrom = $settings.mailTargetFrom
-
 # remove everything from folders
 Get-ChildItem $settings.inboxFolder | Remove-Item -Force -Recurse
 Get-ChildItem $settings.outboxFolder | Remove-Item -Force -Recurse
