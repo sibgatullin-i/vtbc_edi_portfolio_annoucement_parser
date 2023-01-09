@@ -35,7 +35,7 @@ $incomingFiles = (Get-ChildItem $settings.inboxFolder)
 # proceed files - move, parse, download and shit
 foreach ($incomingFile in $incomingFiles) {
   $incomingFileBaseName = ($incomingFile.BaseName -split "-_-")[1]
-  $incomingFileTimeStamp = ($incomingFile.BaseName -split "-_-")[0]
+  #$incomingFileTimeStamp = ($incomingFile.BaseName -split "-_-")[0]
   $source = (Parse-HTML $incomingFile.FullName)
   $HTMLheader = $source[0]
   $HTMLdate = $source[1]
@@ -61,3 +61,6 @@ foreach ($folder in (Get-ChildItem $settings.outboxFolder)) {
 Disconnect-SFTP $sftpClient
 
 Remove-Module source 
+
+write-host "will exit in 10 seconds..."
+start-sleep 10
