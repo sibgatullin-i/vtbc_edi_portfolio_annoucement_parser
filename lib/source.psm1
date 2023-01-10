@@ -98,6 +98,7 @@ function Download-Pages {
     [Parameter(Mandatory)][string]$Prefix,
     [Parameter(Mandatory)][string]$HTMLdate,
     [Parameter(Mandatory)][string]$HTMLheader
+
   )
   foreach ($item in $sourceData) {
     $page = (Invoke-WebRequest -UseBasicParsing $item.Url).Content
@@ -111,5 +112,6 @@ function Download-Pages {
   }
   $sourceData | select-object -Property * -ExcludeProperty Url| convertto-html -CssUri "./style.css" -PreContent "<h2>$HTMLheader</h2>" -Title $HTMLheader |
     ForEach-Object {$_ -replace "&#39;","'" -replace '&lt;','<' -replace '&gt;','>'} |
+    ForEach-Object {$_ -replace '<link rel="stylesheet" type="text/css" href="./style.css" />',"<style type='text/css'>@import url('./style.css');</style>"} |
     Out-File (Join-Path -Path $folder -ChildPath ("index_" + $Prefix + '-' + $HTMLdate + (get-date -Format '_hhMMssffff') + '.html'))
 }
